@@ -25,7 +25,7 @@
       Assert.ArgumentNotNull(data, nameof(data));
 
       AssemblyFile assembly;
-      if (!data.SitecoreInfo.Assemblies.TryGetValue("Sitecore.EmailCampaign.dll".ToLower(), out assembly) || assembly == null)
+      if (!data.SitecoreInfo.Assemblies.TryGetValue("Sitecore.EmailCampaign.dll", out assembly) || assembly == null)
       {
         return null;
       }
