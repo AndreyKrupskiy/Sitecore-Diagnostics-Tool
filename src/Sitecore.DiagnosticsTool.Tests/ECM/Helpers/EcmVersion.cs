@@ -14,13 +14,28 @@
     {
       Assert.ArgumentNotNull(version, nameof(version));
 
-      var match = Parse(version);
-      var groups = match.Groups;
+      if (version.StartsWith("5.0")) //temporary fix for 3.5 assembly product version
+      {
+        Major = 3;
+        Minor = 5;
+        Revision = 170810;
+        Hotfix = string.Empty;
+      }
+      else
+      {
+        version = version
+          .Replace("4.0.0", "3.4.0")
+          .Replace("4.0.1", "3.4.1")
+          .Replace("4.0.2", "3.4.2");
+        
+        var match = Parse(version);
+        var groups = match.Groups;
 
-      Major = int.Parse(groups[1].Value);
-      Minor = int.Parse(groups[2].Value);
-      Revision = groups.Count >= 6 ? int.Parse(groups[5].Value.EmptyToNull() ?? "0") : 0;
-      Hotfix = ParseHotfix(groups[6].Value);
+        Major = int.Parse(groups[1].Value);
+        Minor = int.Parse(groups[2].Value);
+        Revision = groups.Count >= 7 ? int.Parse(groups[6].Value.EmptyToNull() ?? "0") : 0;
+        Hotfix = ParseHotfix(groups[7].Value);
+      }
     }
 
     public int Major { get; }
@@ -94,7 +109,7 @@
     {
       Assert.ArgumentNotNull(productVersion, nameof(productVersion));
 
-      var regex = new Regex(@"^(\d+)\.(\d+)(\.0)?( rev\. (\d\d\d\d\d\d))?(\s+[hH][oO][tT][fF][iI][xX]\s+\d\d\d\d\d\d-?\d*)?$");
+      var regex = new Regex(@"^(\d+)\.(\d+)(\.(\d))?( rev\. (\d\d\d\d\d\d))?(\s+[hH][oO][tT][fF][iI][xX]\s+\d\d\d\d\d\d-?\d*)?$");
       var match = regex.Match(productVersion);
       if (!match.Success)
       {
