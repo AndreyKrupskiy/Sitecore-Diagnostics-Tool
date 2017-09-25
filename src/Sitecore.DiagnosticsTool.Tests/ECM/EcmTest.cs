@@ -12,15 +12,22 @@ namespace Sitecore.DiagnosticsTool.Tests.ECM
   public abstract class EcmTest : Test
   {
     public override IEnumerable<Category> Categories { get; } = new[] { Category.Ecm };
-    public virtual bool IsEcmVersionActual(EcmVersion ecmVersion)
+    protected virtual bool IsEcmVersionActual(EcmVersion ecmVersion)
     {
-      return true;
+      return ecmVersion != null;
     }
     public override void Process(ITestResourceContext data, ITestOutputContext output)
     {
       if (IsEcmVersionActual(EcmHelper.GetEcmVersion(data)))
       {
-        DoProcess(data, output);
+        if (data.SitecoreInfo.IsAnalyticsEnabled)
+        {
+          DoProcess(data, output);
+        }
+        else
+        {
+          output.Error("EXM cannot run if Analytics is disabled");
+        }
       }
       else
       {
