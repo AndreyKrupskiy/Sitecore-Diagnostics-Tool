@@ -7,9 +7,9 @@
   using Sitecore.DiagnosticsTool.Core.Tests;
   using Sitecore.DiagnosticsTool.Tests.ECM.Helpers;
 
-  public class ExmSpeakHandlerChecker : Test
+  public class ExmSpeakHandlerChecker : EcmTest
   {
-    private const string ecmSpeakHandlerPath = "sitecore_ecm_speak_request.ashx";
+    private const string EcmSpeakHandlerPath = "sitecore_ecm_speak_request.ashx";
 
     public override string Name { get; } = "SPEAK handlers are present in web.config";
 
@@ -20,7 +20,12 @@
       return sitecoreVersion.Major >= 7;
     }
 
-    public override void Process(ITestResourceContext data, ITestOutputContext output)
+    protected override bool IsEcmVersionActual(EcmVersion ecmVersion)
+    {
+      return base.IsEcmVersionActual(ecmVersion) && ecmVersion.MajorMinorInt > 21;
+    }
+
+    public override void DoProcess(ITestResourceContext data, ITestOutputContext output)
     {
       Assert.ArgumentNotNull(data, nameof(data));
 
@@ -33,12 +38,12 @@
       var majorMinor = ecmVersion.MajorMinorInt;
       if (majorMinor >= 31)
       {
-        var httpHandlersNode = data.SitecoreInfo.Configuration.SelectSingleNode($"/configuration/system.web/httpHandlers/add[@path='{ecmSpeakHandlerPath}']");
+        var httpHandlersNode = data.SitecoreInfo.Configuration.SelectSingleNode($"/configuration/system.web/httpHandlers/add[@path='{EcmSpeakHandlerPath}']");
         if (httpHandlersNode != null)
         {
           output.Warning(GetErrorMessage("<httpHandlers>", false));
         }
-        var handlersNode = data.SitecoreInfo.Configuration.SelectSingleNode($"/configuration/system.webSerber/handlers/add[@path='{ecmSpeakHandlerPath}']");
+        var handlersNode = data.SitecoreInfo.Configuration.SelectSingleNode($"/configuration/system.webSerber/handlers/add[@path='{EcmSpeakHandlerPath}']");
         if (handlersNode != null)
         {
           output.Warning(GetErrorMessage("<handlers>", false));
@@ -46,12 +51,12 @@
       }
       if (majorMinor == 22 || majorMinor == 30)
       {
-        var httpHandlersNode = data.SitecoreInfo.Configuration.SelectSingleNode($"/configuration/system.web/httpHandlers/add[@path='{ecmSpeakHandlerPath}']");
+        var httpHandlersNode = data.SitecoreInfo.Configuration.SelectSingleNode($"/configuration/system.web/httpHandlers/add[@path='{EcmSpeakHandlerPath}']");
         if (httpHandlersNode == null)
         {
           output.Warning(GetErrorMessage("<httpHandlers>", true));
         }
-        var handlersNode = data.SitecoreInfo.Configuration.SelectSingleNode($"/configuration/system.webSerber/handlers/add[@path='{ecmSpeakHandlerPath}']");
+        var handlersNode = data.SitecoreInfo.Configuration.SelectSingleNode($"/configuration/system.webSerber/handlers/add[@path='{EcmSpeakHandlerPath}']");
         if (handlersNode == null)
         {
           output.Warning(GetErrorMessage("<handlers>", true));

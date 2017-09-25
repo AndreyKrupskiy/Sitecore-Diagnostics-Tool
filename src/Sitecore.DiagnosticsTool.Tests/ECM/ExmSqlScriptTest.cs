@@ -1,5 +1,6 @@
 ﻿namespace Sitecore.DiagnosticsTool.Tests.ECM
 {
+  using Sitecore.DiagnosticsTool.Tests.ECM.Helpers;
   using System;
   using System.Collections.Generic;
   using System.Linq;
@@ -11,7 +12,7 @@
   using Sitecore.DiagnosticsTool.Core.Extensions;
   using Sitecore.DiagnosticsTool.Core.Tests;
 
-  public class ExmSqlScriptTest : Test
+  public class ExmSqlScriptTest : EcmTest
   {
     [NotNull]
     protected readonly string[] ProcedureNames =
@@ -39,64 +40,27 @@
 
     public override IEnumerable<Category> Categories { get; } = new[] { Category.Ecm };
 
-    protected override bool IsActual(ISitecoreVersion sitecoreVersion)
-    {
-      return sitecoreVersion.Major >= 8;
-    }
-
     protected override bool IsActual(IReadOnlyCollection<ServerRole> roles)
     {
       // this test is valid only for authoring or reporting instances
       return roles.Contains(ServerRole.ContentManagement) || roles.Contains(ServerRole.Reporting);
     }
 
-    /// <inheritdoc />
-    public override bool IsActual(IReadOnlyCollection<ServerRole> roles, ISitecoreVersion sitecoreVersion, ITestResourceContext data)
+    protected override bool IsEcmVersionActual(EcmVersion ecmVersion)
     {
-      try
-      {
-        if (!data.SitecoreInfo.Assemblies.ContainsKey("Sitecore.EmailCampaign.dll".ToLower()))
-        {
-          return false;
-        }
-      }
-      catch
-      {
-      }
-
-      try
-      {
-        if (data.SitecoreInfo.Configuration.SelectSingleElement("/configuration/sitecore/TypeResolver") == null)
-        {
-          return false;
-        }
-      }
-      catch
-      {
-      }
-
-      return true;
+      return base.IsEcmVersionActual(ecmVersion) && ecmVersion.MajorMinorInt >= 30 && ecmVersion.MajorMinorInt <= 32;
     }
 
-    public override void Process(ITestResourceContext data, ITestOutputContext output)
+    public override void DoProcess(ITestResourceContext data, ITestOutputContext output)
     {
       Assert.ArgumentNotNull(data, nameof(data));
 
-      var xdbEnabled = data.SitecoreInfo.IsAnalyticsEnabled;
       var name = "reporting";
       var reporting = data.Databases.Sql[name];
       if (reporting == null)
       {
-        var message = $"The {name} connection string is not presented in the ConnectionStrings.config file";
-        if (xdbEnabled)
-        {
-          output.Error(message);
-        }
-        else
-        {
-          output.Debug(message + ", but that's okay since xdb is disabled");
-        }
-
+        var message = $"Cannot check the Reporting database. The {name} connection string is not presented in the ConnectionStrings.config file";
+        output.Warning(message);
         return;
       }
 
@@ -124,14 +88,7 @@
       if (sb.Length > 0)
       {
         var message = $"One or several objects are missing in the reporting database. This may happen if EXM SQL script was not run or ended with error. Please refer to EXM installation guide for more details.:{sb}";
-        if (xdbEnabled)
-        {
-          output.Error(message);
-        }
-        else
-        {
-          output.Debug(message);
-        }
+        output.Error(message);
       }
     }
   }

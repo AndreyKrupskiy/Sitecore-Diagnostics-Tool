@@ -46,7 +46,7 @@
         .Create(this)
         .AddResource(sitecoreConfiguration)
         .Process(this)
-        .MustReturn(new TestOutput(TestResultState.Warning, ErrorMessage, Link))
+        .MustReturn(new TestOutput(TestResultState.Warning, string.Format(ErrorFormatWithMessage, KbNumber, ErrorMessage, KbName), Link))
         .Done();
     }
   }

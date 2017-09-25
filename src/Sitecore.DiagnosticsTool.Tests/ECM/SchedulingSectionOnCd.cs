@@ -6,7 +6,7 @@
   using Sitecore.DiagnosticsTool.Core.Categories;
   using Sitecore.DiagnosticsTool.Core.Tests;
 
-  public class SchedulingSectionOnCd : Test
+  public class SchedulingSectionOnCd : EcmTest
   {
     public override IEnumerable<Category> Categories { get; } = new[] { Category.Ecm };
 
@@ -17,7 +17,7 @@
     [NotNull]
     protected string ErrorMessage => "ECM agents found in scheduling section. These agents should be disabled on CD.";
 
-    public override void Process(ITestResourceContext data, ITestOutputContext output)
+    public override void DoProcess(ITestResourceContext data, ITestOutputContext output)
     {
       Assert.ArgumentNotNull(data, nameof(data));
 
