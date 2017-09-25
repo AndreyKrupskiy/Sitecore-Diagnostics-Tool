@@ -14,28 +14,18 @@
     {
       Assert.ArgumentNotNull(version, nameof(version));
 
-      if (version.StartsWith("5.0")) //temporary fix for 3.5 assembly product version
-      {
-        Major = 3;
-        Minor = 5;
-        Revision = 170810;
-        Hotfix = string.Empty;
-      }
-      else
-      {
-        version = version
-          .Replace("4.0.0", "3.4.0")
-          .Replace("4.0.1", "3.4.1")
-          .Replace("4.0.2", "3.4.2");
-        
-        var match = Parse(version);
-        var groups = match.Groups;
+      version = version
+        .Replace("4.0.0", "3.4.0")
+        .Replace("4.0.1", "3.4.1")
+        .Replace("4.0.2", "3.4.2")
+        .Replace("5.0.0", "3.5.0"); //product version hack for EXM 3.4 and newer
 
-        Major = int.Parse(groups[1].Value);
-        Minor = int.Parse(groups[2].Value);
-        Revision = groups.Count >= 7 ? int.Parse(groups[6].Value.EmptyToNull() ?? "0") : 0;
-        Hotfix = ParseHotfix(groups[7].Value);
-      }
+      var match = Parse(version);
+      var groups = match.Groups;
+
+      Major = int.Parse(groups[1].Value);
+      Minor = int.Parse(groups[2].Value);
+      Update = string.IsNullOrEmpty(groups[4].Value) ? 0 : int.Parse(groups[4].Value);
     }
 
     public int Major { get; }
@@ -46,7 +36,13 @@
 
     public int Minor { get; }
 
-    public int Update
+    public int Update { get; }
+
+    public string MajorMinorUpdate => $"{Major}.{Minor}.{Update}";
+
+    public int MajorMinorUpdateInt=>int.Parse($"{Major}{Minor}{Update}");
+
+    public int Revision
     {
       get
       {
@@ -54,25 +50,13 @@
       }
     }
 
-    public string MajorMinorUpdate
+    public string Hotfix
     {
       get
       {
         throw new NotImplementedException();
       }
     }
-
-    public int MajorMinorUpdateInt
-    {
-      get
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    public int Revision { get; }
-
-    public string Hotfix { get; }
 
     public string Text => ToString();
 
@@ -84,7 +68,7 @@
     /// </returns>
     public override string ToString()
     {
-      return $"{Major}.{Minor} rev. {Revision}{Hotfix.EmptyToNull().With(x => " " + x)}";
+      return MajorMinorUpdate;
     }
 
     public override bool Equals(object obj)
@@ -117,20 +101,6 @@
       }
 
       return match;
-    }
-
-    [NotNull]
-    private static string ParseHotfix([CanBeNull] string value)
-    {
-      if (string.IsNullOrEmpty(value))
-      {
-        return string.Empty;
-      }
-
-      var lower = value.Trim().ToLower();
-      Assert.ArgumentCondition(!lower.Contains("hotfix-"), "value", "Hotfix-##### format is not supported");
-
-      return lower.Replace("hotfix", "Hotfix");
     }
   }
 }
