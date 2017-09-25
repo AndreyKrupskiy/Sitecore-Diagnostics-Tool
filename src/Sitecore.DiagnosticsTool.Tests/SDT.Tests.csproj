@@ -64,6 +64,7 @@
     <Compile Include="Analytics\EmailReportsTaskFailsWithoutMasterDatabase.cs" />
     <Compile Include="Analytics\ContactIsLockedByAnotherOperationExceptionOccursWhileSavingAnalyticsDataIfAnalyticsClusterNameIsNotSpecified.cs" />
     <Compile Include="Analytics\MaxMindNotSupported.cs" />
+    <Compile Include="ECM\EcmTest.cs" />
     <Compile Include="ECM\ExMSpeakHandlerChecker.cs" />
     <Compile Include="General\Performance\AbstractQueueSizeTest.cs" />
     <Compile Include="General\Performance\CheckIndexFragmentation.cs" />
